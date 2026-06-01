@@ -1,0 +1,237 @@
+/* ================================================================
+   INFRADESK REMOTE – SPLASH SCREEN CSS
+   Animated Entry Experience
+================================================================ */
+
+.splash-screen {
+  position: fixed;
+  inset: 0;
+  background: #0B1220;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-splash);
+  overflow: hidden;
+  transition: opacity 0.6s ease, visibility 0.6s ease;
+}
+.splash-screen.fade-out {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Animated Network Canvas Background */
+.network-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.35;
+}
+
+/* Gradient overlay */
+.splash-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 70% 60% at 50% 50%,
+    rgba(37, 99, 235, 0.08) 0%,
+    rgba(11, 18, 32, 0.6) 60%,
+    rgba(11, 18, 32, 0.95) 100%
+  );
+  pointer-events: none;
+}
+
+/* Main centered content */
+.splash-content {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  animation: splash-content-in 0.8s ease 0.2s both;
+}
+
+@keyframes splash-content-in {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Pulsing Shield Rings */
+.shield-ring-outer,
+.shield-ring-mid,
+.shield-ring-inner {
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.shield-ring-outer {
+  width: 200px; height: 200px;
+  border: 1px solid rgba(37, 99, 235, 0.12);
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.04), transparent 70%);
+  animation: ring-pulse-outer 3s ease-in-out infinite;
+}
+.shield-ring-mid {
+  width: 160px; height: 160px;
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.06), transparent 70%);
+  animation: ring-pulse-mid 3s ease-in-out 0.5s infinite;
+}
+.shield-ring-inner {
+  width: 120px; height: 120px;
+  border: 1.5px solid rgba(37, 99, 235, 0.35);
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.1), transparent 70%);
+  animation: ring-pulse-inner 3s ease-in-out 1s infinite;
+}
+
+@keyframes ring-pulse-outer {
+  0%, 100% { transform: scale(1); opacity: 0.6; }
+  50%       { transform: scale(1.04); opacity: 1; }
+}
+@keyframes ring-pulse-mid {
+  0%, 100% { transform: scale(1); opacity: 0.7; }
+  50%       { transform: scale(1.06); opacity: 1; }
+}
+@keyframes ring-pulse-inner {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50%       { transform: scale(1.08); opacity: 1; }
+}
+
+/* Logo Block */
+.splash-logo-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.splash-logo-icon {
+  width: 80px; height: 80px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(37,99,235,0.2), rgba(29,78,216,0.1));
+  border: 1px solid rgba(37, 99, 235, 0.3);
+  box-shadow: 0 0 40px rgba(37, 99, 235, 0.25), 0 8px 32px rgba(0,0,0,0.5);
+  animation: logo-float 4s ease-in-out infinite;
+}
+@keyframes logo-float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-4px); }
+}
+.splash-logo-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.splash-brand-name {
+  font-family: 'Inter', sans-serif;
+  font-size: 28px;
+  font-weight: 800;
+  color: #F9FAFB;
+  letter-spacing: -0.5px;
+}
+.splash-brand-tag {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #2563EB;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  background: rgba(37,99,235,0.12);
+  padding: 2px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(37,99,235,0.25);
+}
+
+/* Taglines */
+.splash-tagline {
+  font-size: 18px;
+  font-weight: 700;
+  color: #F9FAFB;
+  letter-spacing: -0.3px;
+  text-align: center;
+}
+.splash-sub {
+  font-size: 13px;
+  color: #64748B;
+  text-align: center;
+  margin-top: -16px;
+  letter-spacing: 0.02em;
+}
+
+/* Progress Loader */
+.splash-loader-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 280px;
+}
+.splash-loader-track {
+  width: 100%;
+  height: 3px;
+  background: rgba(36, 48, 65, 0.8);
+  border-radius: 999px;
+  overflow: hidden;
+  position: relative;
+}
+.splash-loader-bar {
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #2563EB, #06B6D4);
+  box-shadow: 0 0 8px rgba(37, 99, 235, 0.6);
+  transition: width 0.4s ease;
+  position: relative;
+}
+.splash-loader-bar::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: 40px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4));
+  border-radius: 999px;
+}
+.splash-loader-label {
+  font-size: 11px;
+  color: #475569;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.04em;
+}
+
+/* Version Badge */
+.splash-version {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: #334155;
+  font-family: 'JetBrains Mono', monospace;
+  margin-top: -8px;
+}
+.splash-sep { color: #1E293B; }
+.splash-secure-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #10B981;
+  font-size: 11px;
+}
+
+/* Corner decorations */
+.splash-corner {
+  position: absolute;
+  width: 48px; height: 48px;
+  opacity: 0.15;
+}
+.splash-corner.tl { top: 24px; left: 24px; border-top: 2px solid #2563EB; border-left: 2px solid #2563EB; border-radius: 4px 0 0 0; }
+.splash-corner.tr { top: 24px; right: 24px; border-top: 2px solid #2563EB; border-right: 2px solid #2563EB; border-radius: 0 4px 0 0; }
+.splash-corner.bl { bottom: 24px; left: 24px; border-bottom: 2px solid #2563EB; border-left: 2px solid #2563EB; border-radius: 0 0 0 4px; }
+.splash-corner.br { bottom: 24px; right: 24px; border-bottom: 2px solid #2563EB; border-right: 2px solid #2563EB; border-radius: 0 0 4px 0; }
