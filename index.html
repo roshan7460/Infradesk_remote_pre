@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>InfraDesk Remote – Enterprise RMM Platform</title>
+  <link rel="stylesheet" href="assets/css/main.css" />
+  <link rel="stylesheet" href="assets/css/splash.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg" />
+</head>
+<body class="splash-page">
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!--                  SPLASH SCREEN                  -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div id="splash-screen" class="splash-screen">
+
+    <!-- Animated Background Canvas -->
+    <canvas id="network-canvas" class="network-canvas"></canvas>
+
+    <!-- Glassmorphism overlay -->
+    <div class="splash-overlay"></div>
+
+    <!-- Main Content -->
+    <div class="splash-content">
+
+      <!-- Security Shield Pulse Ring -->
+      <div class="shield-ring-outer">
+        <div class="shield-ring-mid">
+          <div class="shield-ring-inner">
+            <!-- Logo Block -->
+            <div class="splash-logo-block">
+              <div class="splash-logo-icon">
+                <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect width="64" height="64" rx="16" fill="url(#logoGrad)"/>
+                  <path d="M32 8L14 16V32C14 43.05 21.73 53.36 32 56C42.27 53.36 50 43.05 50 32V16L32 8Z" fill="white" fill-opacity="0.15"/>
+                  <path d="M32 12L17 19.5V32C17 41.8 23.9 50.9 32 53.5C40.1 50.9 47 41.8 47 32V19.5L32 12Z" fill="white" fill-opacity="0.1"/>
+                  <path d="M26 32L30 36L38 28" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M20 26H24M44 26H40" stroke="white" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+                  <path d="M32 18V22M32 42V46" stroke="white" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+                  <defs>
+                    <linearGradient id="logoGrad" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+                      <stop stop-color="#2563EB"/>
+                      <stop offset="1" stop-color="#1D4ED8"/>
+                    </linearGradient>
+                  </defs>
+                </svg>
+              </div>
+              <div class="splash-logo-text">
+                <span class="splash-brand-name">InfraDesk</span>
+                <span class="splash-brand-tag">Remote</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tagline -->
+      <p class="splash-tagline">Secure. Fast. Reliable Remote Access.</p>
+      <p class="splash-sub">Enterprise Remote Monitoring & Management Platform</p>
+
+      <!-- Loading Bar -->
+      <div class="splash-loader-wrap">
+        <div class="splash-loader-track">
+          <div class="splash-loader-bar" id="splash-loader-bar"></div>
+        </div>
+        <span class="splash-loader-label" id="splash-loader-label">Initializing secure connection...</span>
+      </div>
+
+      <!-- Version Info -->
+      <div class="splash-version">
+        <span>Version 2.4.1</span>
+        <span class="splash-sep">·</span>
+        <span>Build 20260601</span>
+        <span class="splash-sep">·</span>
+        <span class="splash-secure-badge">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1L1.5 3.25V6C1.5 8.76 3.48 11.33 6 12C8.52 11.33 10.5 8.76 10.5 6V3.25L6 1Z" fill="#10B981"/></svg>
+          End-to-End Encrypted
+        </span>
+      </div>
+
+    </div>
+
+    <!-- Corner Decorations -->
+    <div class="splash-corner tl"></div>
+    <div class="splash-corner tr"></div>
+    <div class="splash-corner bl"></div>
+    <div class="splash-corner br"></div>
+
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!--               APP SHELL (hidden until loaded)   -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div id="app-shell" class="app-shell hidden">
+    <!-- Onboarding is loaded here if first visit -->
+    <div id="onboarding-container"></div>
+    <!-- Auth pages loaded here -->
+    <div id="auth-container"></div>
+    <!-- Main app loaded here -->
+    <div id="main-app-container"></div>
+  </div>
+
+  <!-- Global Toast Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Global Modal Backdrop -->
+  <div id="modal-backdrop" class="modal-backdrop hidden"></div>
+
+  <!-- Scripts -->
+  <script src="assets/js/splash.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>
