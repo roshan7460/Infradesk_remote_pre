@@ -2,355 +2,500 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>InfraDesk Remote – Enterprise RMM Platform</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
-<style>
-  *{margin:0;padding:0;box-sizing:border-box}
-  :root{
-    --blue:#2563EB;--blue-hover:#1D4ED8;--success:#10B981;--warning:#F59E0B;
-    --danger:#EF4444;--info:#06B6D4;--bg-dark:#0B1220;--bg-sec:#111827;
-    --card:#1A2332;--border:#243041;--text-pri:#F9FAFB;--text-sec:#94A3B8;
-  }
-  html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg-dark);color:var(--text-pri);overflow-x:hidden}
-
-  /* ── SPLASH ── */
-  #splash{
-    position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;
-    align-items:center;justify-content:center;background:var(--bg-dark);
-    transition:opacity .6s ease,visibility .6s ease;
-  }
-  #splash.hidden{opacity:0;visibility:hidden;pointer-events:none}
-
-  .splash-canvas{position:absolute;inset:0;overflow:hidden}
-  .splash-canvas canvas{width:100%;height:100%}
-
-  /* grid background */
-  .grid-bg{
-    position:absolute;inset:0;
-    background-image:linear-gradient(var(--border) 1px,transparent 1px),
-                     linear-gradient(90deg,var(--border) 1px,transparent 1px);
-    background-size:40px 40px;opacity:.35;
-  }
-  .radial-glow{
-    position:absolute;width:700px;height:700px;border-radius:50%;
-    background:radial-gradient(circle,rgba(37,99,235,.22) 0%,transparent 70%);
-    top:50%;left:50%;transform:translate(-50%,-50%);
-  }
-
-  .splash-center{position:relative;z-index:2;text-align:center;display:flex;flex-direction:column;align-items:center;gap:28px}
-
-  .logo-ring{
-    width:110px;height:110px;border-radius:28px;
-    background:linear-gradient(135deg,#1e3a8a 0%,#2563EB 100%);
-    display:flex;align-items:center;justify-content:center;
-    box-shadow:0 0 0 1px rgba(37,99,235,.4),0 0 60px rgba(37,99,235,.35),0 20px 50px rgba(0,0,0,.6);
-    position:relative;animation:pulse-ring 2.5s ease-in-out infinite;
-  }
-  @keyframes pulse-ring{0%,100%{box-shadow:0 0 0 1px rgba(37,99,235,.4),0 0 60px rgba(37,99,235,.35),0 20px 50px rgba(0,0,0,.6)}50%{box-shadow:0 0 0 2px rgba(37,99,235,.6),0 0 90px rgba(37,99,235,.55),0 20px 50px rgba(0,0,0,.6)}}
-
-  .logo-ring svg{width:58px;height:58px}
-
-  .splash-title{font-size:2.6rem;font-weight:800;letter-spacing:-.03em;
-    background:linear-gradient(135deg,#fff 0%,#94a3b8 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-  .splash-sub{font-size:1rem;color:var(--text-sec);font-weight:400;letter-spacing:.06em;text-transform:uppercase}
-
-  .splash-loader{width:240px;height:3px;background:var(--border);border-radius:99px;overflow:hidden;margin-top:8px}
-  .splash-loader-bar{height:100%;width:0%;background:linear-gradient(90deg,var(--blue),var(--info));border-radius:99px;transition:width .08s linear}
-
-  .splash-meta{font-size:.75rem;color:#4b5563;font-family:'JetBrains Mono',monospace;margin-top:4px}
-  .splash-meta span{color:var(--blue);margin-left:10px}
-
-  /* orbiting nodes */
-  .orbit-wrap{position:absolute;width:340px;height:340px;animation:spin-slow 18s linear infinite}
-  .orbit-wrap.rev{animation-direction:reverse;animation-duration:25s}
-  @keyframes spin-slow{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-  .orbit-node{
-    position:absolute;width:10px;height:10px;border-radius:50%;
-    background:var(--blue);box-shadow:0 0 12px var(--blue);
-  }
-  .orbit-ring{
-    position:absolute;inset:0;border-radius:50%;
-    border:1px solid rgba(37,99,235,.2);
-  }
-
-  /* ── APP SHELL ── */
-  #app{display:none;height:100vh;flex-direction:column}
-  #app.visible{display:flex}
-
-  /* ── LOGIN PAGE ── */
-  #login-page{
-    display:flex;align-items:stretch;min-height:100vh;
-    background:var(--bg-dark);
-  }
-  .login-left{
-    flex:1;display:flex;align-items:center;justify-content:center;
-    padding:60px 80px;position:relative;overflow:hidden;
-  }
-  .login-left .grid-bg{opacity:.2}
-  .login-left .radial-glow{width:500px;height:500px;opacity:.6}
-
-  .login-art{position:relative;z-index:2;text-align:center;max-width:440px}
-  .login-art-logo{
-    width:72px;height:72px;border-radius:20px;
-    background:linear-gradient(135deg,#1e3a8a,#2563EB);
-    display:inline-flex;align-items:center;justify-content:center;
-    box-shadow:0 0 40px rgba(37,99,235,.4);margin-bottom:28px;
-  }
-  .login-art-logo svg{width:38px;height:38px}
-  .login-art h1{font-size:2rem;font-weight:800;letter-spacing:-.03em;margin-bottom:10px}
-  .login-art p{font-size:1rem;color:var(--text-sec);line-height:1.6;margin-bottom:40px}
-
-  .stat-pills{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
-  .stat-pill{
-    background:rgba(37,99,235,.12);border:1px solid rgba(37,99,235,.25);
-    border-radius:99px;padding:8px 16px;font-size:.8rem;color:var(--info);
-    display:flex;align-items:center;gap:7px;
-  }
-  .stat-pill .dot{width:7px;height:7px;border-radius:50%;background:currentColor;flex-shrink:0}
-
-  .login-divider{width:1px;background:var(--border)}
-
-  .login-right{
-    width:520px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
-    padding:60px 56px;background:var(--bg-sec);
-  }
-  .login-form-wrap{width:100%;max-width:400px}
-
-  .form-header{margin-bottom:32px}
-  .form-header h2{font-size:1.7rem;font-weight:700;letter-spacing:-.02em;margin-bottom:6px}
-  .form-header p{color:var(--text-sec);font-size:.9rem}
-
-  .tab-row{display:flex;gap:0;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:3px;margin-bottom:28px}
-  .tab-btn{
-    flex:1;padding:8px;border-radius:7px;border:none;cursor:pointer;
-    font-family:'Inter',sans-serif;font-size:.85rem;font-weight:500;
-    background:transparent;color:var(--text-sec);transition:.2s;
-  }
-  .tab-btn.active{background:var(--blue);color:#fff;box-shadow:0 2px 10px rgba(37,99,235,.4)}
-
-  .form-group{margin-bottom:18px}
-  .form-label{display:block;font-size:.82rem;font-weight:500;color:var(--text-sec);margin-bottom:7px}
-  .form-input{
-    width:100%;padding:11px 14px;background:var(--card);border:1px solid var(--border);
-    border-radius:9px;color:var(--text-pri);font-family:'Inter',sans-serif;font-size:.92rem;
-    outline:none;transition:.2s;
-  }
-  .form-input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.15)}
-  .form-input::placeholder{color:#4b5563}
-
-  .input-wrap{position:relative}
-  .input-icon{position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--text-sec)}
-
-  .form-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;font-size:.83rem}
-  .checkbox-wrap{display:flex;align-items:center;gap:8px;cursor:pointer;color:var(--text-sec)}
-  .checkbox-wrap input{accent-color:var(--blue);width:14px;height:14px}
-  .form-link{color:var(--blue);text-decoration:none;font-weight:500}
-  .form-link:hover{color:var(--info)}
-
-  .btn-primary{
-    width:100%;padding:12px;background:linear-gradient(135deg,var(--blue),var(--blue-hover));
-    border:none;border-radius:9px;color:#fff;font-family:'Inter',sans-serif;
-    font-size:.95rem;font-weight:600;cursor:pointer;transition:.2s;
-    box-shadow:0 4px 20px rgba(37,99,235,.35);margin-bottom:20px;
-  }
-  .btn-primary:hover{background:linear-gradient(135deg,var(--blue-hover),#1e40af);transform:translateY(-1px);box-shadow:0 6px 24px rgba(37,99,235,.45)}
-  .btn-primary:active{transform:translateY(0)}
-
-  .divider-or{text-align:center;position:relative;color:var(--text-sec);font-size:.8rem;margin-bottom:18px}
-  .divider-or::before,.divider-or::after{content:'';position:absolute;top:50%;width:42%;height:1px;background:var(--border)}
-  .divider-or::before{left:0}.divider-or::after{right:0}
-
-  .sso-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px}
-  .sso-btn{
-    display:flex;align-items:center;justify-content:center;gap:8px;
-    padding:10px;background:var(--card);border:1px solid var(--border);
-    border-radius:8px;cursor:pointer;font-size:.83rem;font-weight:500;
-    color:var(--text-pri);transition:.2s;font-family:'Inter',sans-serif;
-  }
-  .sso-btn:hover{border-color:var(--blue);background:rgba(37,99,235,.08)}
-  .sso-btn img{width:18px;height:18px}
-
-  .security-badges{display:flex;align-items:center;justify-content:center;gap:16px;padding-top:16px;border-top:1px solid var(--border)}
-  .sec-badge{display:flex;align-items:center;gap:5px;font-size:.74rem;color:var(--text-sec)}
-  .sec-badge .dot-green{width:7px;height:7px;border-radius:50%;background:var(--success);flex-shrink:0;box-shadow:0 0 8px var(--success)}
-
-  /* ── pages hidden by default ── */
-  .page{display:none}
-  .page.active{display:flex;flex:1}
-
-  /* scrollbar */
-  ::-webkit-scrollbar{width:5px;height:5px}
-  ::-webkit-scrollbar-track{background:var(--bg-sec)}
-  ::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px}
-  ::-webkit-scrollbar-thumb:hover{background:#3a4a5c}
-</style>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="styles/main.css"/>
+<link rel="stylesheet" href="styles/components.css"/>
+<link rel="stylesheet" href="styles/dashboard.css"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/umd/lucide.min.js"></script>
 </head>
-<body>
+<body class="dark-theme">
 
-<!-- ═══════════════════════ SPLASH ═══════════════════════ -->
-<div id="splash">
-  <div class="grid-bg"></div>
-  <div class="radial-glow"></div>
-
-  <!-- orbit rings -->
-  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:340px;height:340px;pointer-events:none">
-    <div class="orbit-ring"></div>
-    <div class="orbit-wrap">
-      <div class="orbit-node" style="top:-5px;left:calc(50% - 5px)"></div>
-      <div class="orbit-node" style="bottom:-5px;left:calc(50% - 5px);background:var(--info);box-shadow:0 0 12px var(--info)"></div>
-    </div>
-    <div style="position:absolute;inset:30px;border-radius:50%;border:1px solid rgba(6,182,212,.15)">
-      <div class="orbit-wrap rev" style="position:absolute;inset:0">
-        <div class="orbit-node" style="top:-5px;right:10px;background:var(--success);box-shadow:0 0 12px var(--success)"></div>
-        <div class="orbit-node" style="bottom:20px;left:-5px;background:var(--warning);box-shadow:0 0 12px var(--warning)"></div>
+<!-- ═══════════════════════════════════════════════════════════════
+     SPLASH SCREEN
+════════════════════════════════════════════════════════════════ -->
+<div id="splash-screen" class="splash-screen">
+  <div class="splash-bg-animation">
+    <canvas id="networkCanvas"></canvas>
+  </div>
+  <div class="splash-content">
+    <div class="splash-logo-wrap">
+      <div class="splash-shield">
+        <svg viewBox="0 0 80 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M40 4L8 18V42C8 60 22 76 40 82C58 76 72 60 72 42V18L40 4Z" fill="url(#shieldGrad)" stroke="rgba(37,99,235,0.6)" stroke-width="1.5"/>
+          <path d="M28 44L36 52L54 34" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          <defs>
+            <linearGradient id="shieldGrad" x1="8" y1="4" x2="72" y2="82" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#1e40af" stop-opacity="0.9"/>
+              <stop offset="100%" stop-color="#2563eb" stop-opacity="0.7"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <div class="splash-brand">
+        <h1 class="splash-title">InfraDesk <span class="brand-accent">Remote</span></h1>
+        <p class="splash-subtitle">Enterprise Remote Management Platform</p>
       </div>
     </div>
-  </div>
-
-  <div class="splash-center">
-    <div class="logo-ring">
-      <svg viewBox="0 0 58 58" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="8" y="8" width="42" height="42" rx="10" stroke="rgba(255,255,255,.2)" stroke-width="1.5"/>
-        <path d="M16 29h8l4-10 6 20 4-10h4" stroke="#60a5fa" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-        <circle cx="44" cy="14" r="5" fill="#10B981"/>
-        <path d="M42 14h4M44 12v4" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
-      </svg>
+    <div class="splash-loader">
+      <div class="splash-progress-bar"><div class="splash-progress-fill" id="splashProgress"></div></div>
+      <span class="splash-status" id="splashStatus">Initializing secure connection...</span>
     </div>
-    <div>
-      <div class="splash-title">InfraDesk Remote</div>
-      <div class="splash-sub">Enterprise RMM &amp; Remote Access Platform</div>
-    </div>
-    <div style="width:100%;text-align:center">
-      <div class="splash-loader"><div class="splash-loader-bar" id="sbar"></div></div>
-      <div class="splash-meta">v4.2.1 <span>Build 20260601</span></div>
+    <div class="splash-meta">
+      <span class="splash-version">v4.2.1 Enterprise</span>
+      <span class="splash-build">Build 2024.12.01.001</span>
+      <div class="splash-security-badge">
+        <span class="shield-icon">🔒</span> TLS 1.3 Encrypted
+      </div>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════════ APP ═══════════════════════ -->
-<div id="app">
-  <!-- Login Page -->
-  <div id="login-page" class="page active">
-    <div class="login-left">
-      <div class="grid-bg"></div>
-      <div class="radial-glow"></div>
-      <div class="login-art">
-        <div class="login-art-logo">
-          <svg viewBox="0 0 58 58" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M16 29h8l4-10 6 20 4-10h4" stroke="#60a5fa" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-            <circle cx="44" cy="14" r="5" fill="#10B981"/>
-            <path d="M42 14h4M44 12v4" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
-          </svg>
+<!-- ═══════════════════════════════════════════════════════════════
+     ONBOARDING SCREENS
+════════════════════════════════════════════════════════════════ -->
+<div id="onboarding-screen" class="onboarding-screen hidden">
+  <div class="onboarding-container">
+    <div class="onboarding-skip" onclick="skipOnboarding()">Skip →</div>
+    <div class="onboarding-slides">
+
+      <!-- Slide 1: Welcome -->
+      <div class="onboarding-slide active" data-slide="1">
+        <div class="ob-illustration">
+          <div class="ob-globe">
+            <div class="ob-globe-ring ob-ring1"></div>
+            <div class="ob-globe-ring ob-ring2"></div>
+            <div class="ob-globe-ring ob-ring3"></div>
+            <div class="ob-globe-core">
+              <svg width="60" height="60" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="none" stroke="#2563EB" stroke-width="2"/><path d="M30 2C30 2 20 15 20 30C20 45 30 58 30 58C30 58 40 45 40 30C40 15 30 2 30 2Z" fill="rgba(37,99,235,0.3)" stroke="#2563EB" stroke-width="1.5"/><path d="M2 30H58" stroke="#2563EB" stroke-width="1.5" stroke-dasharray="4 2"/><path d="M7 18H53M7 42H53" stroke="#2563EB" stroke-width="1" stroke-dasharray="3 3" opacity="0.5"/></svg>
+            </div>
+            <div class="ob-device ob-device1">💻</div>
+            <div class="ob-device ob-device2">🖥️</div>
+            <div class="ob-device ob-device3">📱</div>
+            <div class="ob-device ob-device4">🖨️</div>
+          </div>
         </div>
-        <h1>One Platform.<br/>Total Control.</h1>
-        <p>Monitor, manage, and secure every endpoint across your enterprise — from a single pane of glass.</p>
-        <div class="stat-pills">
-          <div class="stat-pill"><span class="dot"></span>50,000+ Devices Managed</div>
-          <div class="stat-pill"><span class="dot"></span>99.99% Uptime SLA</div>
-          <div class="stat-pill"><span class="dot"></span>SOC 2 Type II Certified</div>
-          <div class="stat-pill"><span class="dot"></span>256-bit AES Encryption</div>
+        <div class="ob-content">
+          <div class="ob-tag">Welcome to InfraDesk Remote</div>
+          <h2 class="ob-title">Manage Every Device, <span class="text-blue">Everywhere</span></h2>
+          <p class="ob-desc">The enterprise-grade platform that unifies remote access, device management, security, and IT helpdesk into one powerful command center.</p>
+          <div class="ob-features">
+            <div class="ob-feat"><span class="ob-feat-icon">🌐</span><span>Global device network</span></div>
+            <div class="ob-feat"><span class="ob-feat-icon">⚡</span><span>Zero-latency control</span></div>
+            <div class="ob-feat"><span class="ob-feat-icon">🔐</span><span>Bank-grade encryption</span></div>
+          </div>
         </div>
       </div>
-    </div>
-    <div class="login-divider"></div>
-    <div class="login-right">
-      <div class="login-form-wrap">
-        <div class="form-header">
-          <h2>Welcome back</h2>
-          <p>Sign in to your InfraDesk workspace</p>
-        </div>
 
-        <div class="tab-row">
-          <button class="tab-btn active" onclick="setTab(this,'email')">Email</button>
-          <button class="tab-btn" onclick="setTab(this,'sso')">SSO</button>
-          <button class="tab-btn" onclick="setTab(this,'mfa')">MFA</button>
-        </div>
-
-        <form onsubmit="goToDashboard(event)">
-          <div class="form-group">
-            <label class="form-label">Work Email</label>
-            <input class="form-input" type="email" placeholder="you@company.com" required/>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Password</label>
-            <div class="input-wrap">
-              <input class="form-input" type="password" id="pw" placeholder="••••••••••" required/>
-              <span class="input-icon" onclick="togglePw()">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-              </span>
+      <!-- Slide 2: Remote Access -->
+      <div class="onboarding-slide" data-slide="2">
+        <div class="ob-illustration">
+          <div class="ob-remote-demo">
+            <div class="ob-screen-local">
+              <div class="ob-screen-bar"><span></span><span></span><span></span></div>
+              <div class="ob-screen-content">
+                <div class="ob-pixel-row" style="width:80%;background:#2563EB;opacity:0.6"></div>
+                <div class="ob-pixel-row" style="width:60%"></div>
+                <div class="ob-pixel-row" style="width:90%"></div>
+                <div class="ob-pixel-row" style="width:45%"></div>
+              </div>
+              <div class="ob-screen-label">Local</div>
+            </div>
+            <div class="ob-connect-line">
+              <div class="ob-connect-pulse"></div>
+              <span class="ob-connect-ms">12ms</span>
+            </div>
+            <div class="ob-screen-remote">
+              <div class="ob-screen-bar"><span></span><span></span><span></span></div>
+              <div class="ob-screen-content">
+                <div class="ob-pixel-row" style="width:70%"></div>
+                <div class="ob-pixel-row" style="width:85%;background:#10B981;opacity:0.5"></div>
+                <div class="ob-pixel-row" style="width:50%"></div>
+                <div class="ob-pixel-row" style="width:75%"></div>
+              </div>
+              <div class="ob-screen-label">Remote — Tokyo</div>
             </div>
           </div>
-          <div class="form-row">
-            <label class="checkbox-wrap"><input type="checkbox" checked/> Remember this device</label>
-            <a href="#" class="form-link">Forgot password?</a>
+        </div>
+        <div class="ob-content">
+          <div class="ob-tag">Remote Access</div>
+          <h2 class="ob-title">Connect Instantly, <span class="text-blue">Control Fully</span></h2>
+          <p class="ob-desc">Take full control of any device worldwide with ultra-low latency sessions. Support teams, manage servers, or access your own machines from anywhere.</p>
+          <div class="ob-features">
+            <div class="ob-feat"><span class="ob-feat-icon">🖥️</span><span>Multi-monitor support</span></div>
+            <div class="ob-feat"><span class="ob-feat-icon">📁</span><span>Drag-drop file transfer</span></div>
+            <div class="ob-feat"><span class="ob-feat-icon">🎙️</span><span>Voice & video calling</span></div>
           </div>
-          <button type="submit" class="btn-primary">Sign In to InfraDesk</button>
-        </form>
-
-        <div class="divider-or">or continue with</div>
-        <div class="sso-grid">
-          <button class="sso-btn" onclick="goToDashboard(event)">
-            <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-            Google
-          </button>
-          <button class="sso-btn" onclick="goToDashboard(event)">
-            <svg width="18" height="18" viewBox="0 0 23 23"><path fill="#f3f3f3" d="M0 0h11v11H0zM12 0h11v11H12zM0 12h11v11H0zM12 12h11v11H12z"/></svg>
-            Microsoft
-          </button>
-          <button class="sso-btn" onclick="goToDashboard(event)">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-            GitHub
-          </button>
-          <button class="sso-btn" onclick="goToDashboard(event)">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect width="24" height="24" rx="4" fill="#0070f3"/><text x="4" y="17" font-size="11" fill="white" font-weight="bold">Az</text></svg>
-            Azure AD
-          </button>
         </div>
+      </div>
 
-        <div class="security-badges">
-          <div class="sec-badge"><span class="dot-green"></span>SSL Secured</div>
-          <div class="sec-badge"><span class="dot-green"></span>MFA Enabled</div>
-          <div class="sec-badge"><span class="dot-green"></span>SOC 2 Compliant</div>
+      <!-- Slide 3: Monitoring -->
+      <div class="onboarding-slide" data-slide="3">
+        <div class="ob-illustration">
+          <div class="ob-monitor-demo">
+            <div class="ob-metric-card"><span class="ob-m-label">CPU</span><div class="ob-m-bar"><div class="ob-m-fill" style="width:68%;background:#2563EB"></div></div><span class="ob-m-val">68%</span></div>
+            <div class="ob-metric-card"><span class="ob-m-label">RAM</span><div class="ob-m-bar"><div class="ob-m-fill" style="width:82%;background:#F59E0B"></div></div><span class="ob-m-val">82%</span></div>
+            <div class="ob-metric-card"><span class="ob-m-label">Disk</span><div class="ob-m-bar"><div class="ob-m-fill" style="width:45%;background:#10B981"></div></div><span class="ob-m-val">45%</span></div>
+            <div class="ob-metric-card"><span class="ob-m-label">Network</span><div class="ob-m-bar"><div class="ob-m-fill" style="width:30%;background:#06B6D4"></div></div><span class="ob-m-val">124 Mbps</span></div>
+            <div class="ob-alert-pill ob-alert-warn">⚠ RAM threshold exceeded on SRV-PROD-01</div>
+          </div>
         </div>
+        <div class="ob-content">
+          <div class="ob-tag">Real-Time Monitoring</div>
+          <h2 class="ob-title">See Everything, <span class="text-blue">Miss Nothing</span></h2>
+          <p class="ob-desc">Monitor CPU, RAM, disk, network, GPU, and temperature across thousands of endpoints in real time with intelligent alerting and threshold rules.</p>
+          <div class="ob-features">
+            <div class="ob-feat"><span class="ob-feat-icon">📊</span><span>Live performance graphs</span></div>
+            <div class="ob-feat"><span class="ob-feat-icon">🔔</span><span>Smart alert engine</span></div>
+            <div class="ob-feat"><span class="ob-feat-icon">🗺️</span><span>Geographic device map</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 4: Security -->
+      <div class="onboarding-slide" data-slide="4">
+        <div class="ob-illustration">
+          <div class="ob-security-demo">
+            <div class="ob-sec-score">
+              <div class="ob-sec-ring">
+                <svg viewBox="0 0 100 100" width="120" height="120">
+                  <circle cx="50" cy="50" r="40" fill="none" stroke="#243041" stroke-width="8"/>
+                  <circle cx="50" cy="50" r="40" fill="none" stroke="#10B981" stroke-width="8" stroke-dasharray="213 251" stroke-dashoffset="63" stroke-linecap="round" transform="rotate(-90 50 50)"/>
+                  <text x="50" y="46" text-anchor="middle" fill="#F9FAFB" font-size="20" font-weight="800">94</text>
+                  <text x="50" y="62" text-anchor="middle" fill="#94A3B8" font-size="9">Security Score</text>
+                </svg>
+              </div>
+            </div>
+            <div class="ob-sec-events">
+              <div class="ob-sec-ev ob-ev-ok"><span class="ob-ev-dot" style="background:#10B981"></span>MFA Active — All Users</div>
+              <div class="ob-sec-ev ob-ev-warn"><span class="ob-ev-dot" style="background:#F59E0B"></span>3 Devices Pending Patch</div>
+              <div class="ob-sec-ev ob-ev-ok"><span class="ob-ev-dot" style="background:#10B981"></span>Zero Threats Detected</div>
+              <div class="ob-sec-ev ob-ev-ok"><span class="ob-ev-dot" style="background:#10B981"></span>SOC2 Compliant</div>
+            </div>
+          </div>
+        </div>
+        <div class="ob-content">
+          <div class="ob-tag">Security Center</div>
+          <h2 class="ob-title">Enterprise Security, <span class="text-blue">Built In</span></h2>
+          <p class="ob-desc">End-to-end encryption, MFA enforcement, threat detection, audit logs, and compliance dashboards for SOC2, ISO27001, GDPR, and HIPAA.</p>
+          <div class="ob-features">
+            <div class="ob-feat"><span class="ob-feat-icon">🛡️</span><span>Zero-trust architecture</span></div>
+            <div class="ob-feat"><span class="ob-feat-icon">📋</span><span>Compliance reporting</span></div>
+            <div class="ob-feat"><span class="ob-feat-icon">🔑</span><span>RBAC & access policies</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 5: Get Started -->
+      <div class="onboarding-slide" data-slide="5">
+        <div class="ob-illustration">
+          <div class="ob-getstarted-demo">
+            <div class="ob-gs-step ob-gs-done"><div class="ob-gs-num">✓</div><span>Create your account</span></div>
+            <div class="ob-gs-step ob-gs-done"><div class="ob-gs-num">✓</div><span>Set up your workspace</span></div>
+            <div class="ob-gs-step ob-gs-active"><div class="ob-gs-num">3</div><span>Install agents on devices</span></div>
+            <div class="ob-gs-step"><div class="ob-gs-num">4</div><span>Configure monitoring rules</span></div>
+            <div class="ob-gs-step"><div class="ob-gs-num">5</div><span>Invite your team</span></div>
+          </div>
+        </div>
+        <div class="ob-content">
+          <div class="ob-tag">Ready to Launch</div>
+          <h2 class="ob-title">Your Command Center <span class="text-blue">Awaits</span></h2>
+          <p class="ob-desc">Deploy your first agent in under 60 seconds. InfraDesk Remote scales from 1 to 100,000+ devices with zero infrastructure overhead.</p>
+          <button class="btn-primary btn-lg" onclick="goToLogin()">Get Started Free →</button>
+          <p class="ob-terms">14-day free trial · No credit card required · SOC2 Certified</p>
+        </div>
+      </div>
+
+    </div><!-- /slides -->
+
+    <!-- Navigation -->
+    <div class="onboarding-nav">
+      <div class="ob-dots">
+        <span class="ob-dot active" onclick="goToSlide(1)"></span>
+        <span class="ob-dot" onclick="goToSlide(2)"></span>
+        <span class="ob-dot" onclick="goToSlide(3)"></span>
+        <span class="ob-dot" onclick="goToSlide(4)"></span>
+        <span class="ob-dot" onclick="goToSlide(5)"></span>
+      </div>
+      <div class="ob-nav-btns">
+        <button class="btn-ghost" id="ob-back-btn" onclick="prevSlide()" style="display:none">← Back</button>
+        <button class="btn-primary" id="ob-next-btn" onclick="nextSlide()">Next →</button>
       </div>
     </div>
   </div>
 </div>
 
-<script>
-// Splash animation
-(function(){
-  let w=0;
-  const bar=document.getElementById('sbar');
-  const iv=setInterval(()=>{
-    w+=Math.random()*4+1;
-    if(w>=100){w=100;clearInterval(iv);
-      setTimeout(()=>{
-        document.getElementById('splash').classList.add('hidden');
-        const app=document.getElementById('app');
-        app.style.display='flex';
-        setTimeout(()=>app.classList.add('visible'),50);
-      },400);
-    }
-    bar.style.width=w+'%';
-  },60);
-})();
+<!-- ═══════════════════════════════════════════════════════════════
+     LOGIN SCREEN
+════════════════════════════════════════════════════════════════ -->
+<div id="login-screen" class="login-screen hidden">
+  <div class="login-bg">
+    <div class="login-bg-grid"></div>
+    <div class="login-bg-glow login-glow1"></div>
+    <div class="login-bg-glow login-glow2"></div>
+  </div>
+  <div class="login-container">
+    <div class="login-brand">
+      <div class="login-logo">
+        <svg viewBox="0 0 40 45" width="36" height="36"><path d="M20 2L4 9V21C4 30 10.5 38.5 20 41C29.5 38.5 36 30 36 21V9L20 2Z" fill="url(#lg1)"/><path d="M14 22L18 26L27 17" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><defs><linearGradient id="lg1" x1="4" y1="2" x2="36" y2="41"><stop stop-color="#1e40af"/><stop offset="1" stop-color="#2563eb"/></linearGradient></defs></svg>
+      </div>
+      <span class="login-brand-name">InfraDesk <strong>Remote</strong></span>
+    </div>
 
-function setTab(btn,type){
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-}
-function togglePw(){
-  const pw=document.getElementById('pw');
-  pw.type=pw.type==='password'?'text':'password';
-}
-function goToDashboard(e){
-  e.preventDefault();
-  window.location.href='dashboard.html';
-}
-</script>
+    <!-- Login Panel -->
+    <div class="login-panel" id="panel-login">
+      <div class="login-panel-header">
+        <h2>Welcome back</h2>
+        <p>Sign in to your enterprise workspace</p>
+      </div>
+      <div class="sso-buttons">
+        <button class="sso-btn" onclick="ssoLogin('google')"><img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18" height="18" alt="G"/> Continue with Google</button>
+        <button class="sso-btn" onclick="ssoLogin('microsoft')"><svg width="18" height="18" viewBox="0 0 21 21"><rect x="1" y="1" width="9" height="9" fill="#f25022"/><rect x="11" y="1" width="9" height="9" fill="#7fba00"/><rect x="1" y="11" width="9" height="9" fill="#00a4ef"/><rect x="11" y="11" width="9" height="9" fill="#ffb900"/></svg> Continue with Microsoft</button>
+        <button class="sso-btn" onclick="ssoLogin('github')"><svg width="18" height="18" viewBox="0 0 24 24" fill="#F9FAFB"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12"/></svg> Continue with GitHub</button>
+      </div>
+      <div class="login-divider"><span>or sign in with email</span></div>
+      <form class="login-form" onsubmit="doLogin(event)">
+        <div class="form-group">
+          <label>Work Email</label>
+          <div class="input-wrap">
+            <span class="input-icon">✉</span>
+            <input type="email" placeholder="you@company.com" class="form-input" id="loginEmail" required/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Password <a href="#" class="form-link" onclick="showPanel('panel-reset')">Forgot?</a></label>
+          <div class="input-wrap">
+            <span class="input-icon">🔒</span>
+            <input type="password" placeholder="••••••••••••" class="form-input" id="loginPass" required/>
+            <button type="button" class="input-toggle" onclick="togglePass(this)">👁</button>
+          </div>
+        </div>
+        <div class="form-row">
+          <label class="checkbox-label"><input type="checkbox" class="checkbox-input"/><span class="checkbox-custom"></span> Remember this device</label>
+        </div>
+        <button type="submit" class="btn-primary btn-full btn-lg">Sign In Securely</button>
+      </form>
+      <div class="login-footer">
+        <div class="login-security-badges">
+          <span class="sec-badge">🔒 TLS 1.3</span>
+          <span class="sec-badge">🛡 MFA Ready</span>
+          <span class="sec-badge">✅ SOC2</span>
+        </div>
+        <p>Don't have an account? <a href="#" class="form-link" onclick="showPanel('panel-register')">Start free trial</a></p>
+      </div>
+    </div>
+
+    <!-- Register Panel -->
+    <div class="login-panel hidden" id="panel-register">
+      <div class="login-panel-header">
+        <h2>Create your workspace</h2>
+        <p>14-day free trial · No credit card</p>
+      </div>
+      <form class="login-form" onsubmit="doRegister(event)">
+        <div class="form-row-2">
+          <div class="form-group"><label>First Name</label><input type="text" class="form-input" placeholder="John"/></div>
+          <div class="form-group"><label>Last Name</label><input type="text" class="form-input" placeholder="Doe"/></div>
+        </div>
+        <div class="form-group"><label>Work Email</label><input type="email" class="form-input" placeholder="john@company.com"/></div>
+        <div class="form-group"><label>Company Name</label><input type="text" class="form-input" placeholder="Acme Corp"/></div>
+        <div class="form-group"><label>Password</label><input type="password" class="form-input" placeholder="Min. 12 characters"/></div>
+        <button type="submit" class="btn-primary btn-full btn-lg">Create Enterprise Workspace</button>
+      </form>
+      <p style="text-align:center;margin-top:16px;color:#94A3B8;font-size:13px">Already have an account? <a href="#" class="form-link" onclick="showPanel('panel-login')">Sign in</a></p>
+    </div>
+
+    <!-- Password Reset Panel -->
+    <div class="login-panel hidden" id="panel-reset">
+      <div class="login-panel-header">
+        <h2>Reset your password</h2>
+        <p>We'll send a secure reset link to your email</p>
+      </div>
+      <form class="login-form" onsubmit="doReset(event)">
+        <div class="form-group"><label>Work Email</label><input type="email" class="form-input" placeholder="you@company.com"/></div>
+        <button type="submit" class="btn-primary btn-full">Send Reset Link</button>
+      </form>
+      <p style="text-align:center;margin-top:16px;color:#94A3B8;font-size:13px"><a href="#" class="form-link" onclick="showPanel('panel-login')">← Back to sign in</a></p>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MAIN APP SHELL
+════════════════════════════════════════════════════════════════ -->
+<div id="app-shell" class="app-shell hidden">
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <svg viewBox="0 0 40 45" width="28" height="28"><path d="M20 2L4 9V21C4 30 10.5 38.5 20 41C29.5 38.5 36 30 36 21V9L20 2Z" fill="url(#slg)"/><path d="M14 22L18 26L27 17" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><defs><linearGradient id="slg" x1="4" y1="2" x2="36" y2="41"><stop stop-color="#1e40af"/><stop offset="1" stop-color="#2563eb"/></linearGradient></defs></svg>
+        <span class="sidebar-brand">InfraDesk</span>
+      </div>
+      <button class="sidebar-collapse" onclick="toggleSidebar()" id="sidebarToggle">☰</button>
+    </div>
+
+    <div class="sidebar-workspace">
+      <div class="workspace-selector" onclick="toggleWorkspace()">
+        <div class="workspace-avatar">AC</div>
+        <div class="workspace-info">
+          <span class="workspace-name">Acme Corp</span>
+          <span class="workspace-plan">Enterprise Plan</span>
+        </div>
+        <span class="workspace-arrow">⌄</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <span class="nav-section-label">Overview</span>
+        <a class="nav-item active" href="#" onclick="showPage('dashboard',this)">
+          <span class="nav-icon">⊞</span><span class="nav-label">Dashboard</span>
+        </a>
+        <a class="nav-item" href="#" onclick="showPage('monitoring',this)">
+          <span class="nav-icon">📊</span><span class="nav-label">Monitoring</span>
+          <span class="nav-badge nav-badge-warn">3</span>
+        </a>
+        <a class="nav-item" href="#" onclick="showPage('alerts',this)">
+          <span class="nav-icon">🔔</span><span class="nav-label">Alerts</span>
+          <span class="nav-badge nav-badge-danger">7</span>
+        </a>
+      </div>
+      <div class="nav-section">
+        <span class="nav-section-label">Devices</span>
+        <a class="nav-item" href="#" onclick="showPage('devices',this)">
+          <span class="nav-icon">🖥️</span><span class="nav-label">Device Inventory</span>
+        </a>
+        <a class="nav-item" href="#" onclick="showPage('remote',this)">
+          <span class="nav-icon">🖱️</span><span class="nav-label">Remote Sessions</span>
+        </a>
+        <a class="nav-item" href="#" onclick="showPage('filetransfer',this)">
+          <span class="nav-icon">📁</span><span class="nav-label">File Transfer</span>
+        </a>
+        <a class="nav-item" href="#" onclick="showPage('software',this)">
+          <span class="nav-icon">📦</span><span class="nav-label">Software Inventory</span>
+        </a>
+      </div>
+      <div class="nav-section">
+        <span class="nav-section-label">Management</span>
+        <a class="nav-item" href="#" onclick="showPage('patches',this)">
+          <span class="nav-icon">🔧</span><span class="nav-label">Patch Management</span>
+          <span class="nav-badge nav-badge-warn">12</span>
+        </a>
+        <a class="nav-item" href="#" onclick="showPage('agents',this)">
+          <span class="nav-icon">⚙️</span><span class="nav-label">Agent Manager</span>
+        </a>
+        <a class="nav-item" href="#" onclick="showPage('helpdesk',this)">
+          <span class="nav-icon">🎫</span><span class="nav-label">Helpdesk</span>
+          <span class="nav-badge nav-badge-blue">24</span>
+        </a>
+      </div>
+      <div class="nav-section">
+        <span class="nav-section-label">Security & Reports</span>
+        <a class="nav-item" href="#" onclick="showPage('security',this)">
+          <span class="nav-icon">🛡️</span><span class="nav-label">Security Center</span>
+        </a>
+        <a class="nav-item" href="#" onclick="showPage('reports',this)">
+          <span class="nav-icon">📈</span><span class="nav-label">Reports & Analytics</span>
+        </a>
+        <a class="nav-item" href="#" onclick="showPage('users',this)">
+          <span class="nav-icon">👥</span><span class="nav-label">User Management</span>
+        </a>
+      </div>
+      <div class="nav-section">
+        <span class="nav-section-label">System</span>
+        <a class="nav-item" href="#" onclick="showPage('settings',this)">
+          <span class="nav-icon">⚙</span><span class="nav-label">Settings</span>
+        </a>
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="user-avatar">JD</div>
+        <div class="user-info">
+          <span class="user-name">John Doe</span>
+          <span class="user-role">Super Admin</span>
+        </div>
+        <button class="user-logout" onclick="doLogout()" title="Logout">⏻</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <div class="main-content" id="mainContent">
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="topbar-breadcrumb" id="breadcrumb">Dashboard</div>
+        <div class="global-search">
+          <span class="search-icon">🔍</span>
+          <input type="text" placeholder="Search devices, sessions, tickets..." class="search-input" id="globalSearch"/>
+          <span class="search-kbd">⌘K</span>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <button class="topbar-btn" onclick="showPage('remote',null)" title="New Remote Session">
+          <span>🖱️</span> New Session
+        </button>
+        <div class="topbar-divider"></div>
+        <button class="topbar-icon-btn" title="Notifications" onclick="toggleNotifPanel()">
+          🔔 <span class="notif-dot"></span>
+        </button>
+        <button class="topbar-icon-btn" title="Help">❓</button>
+        <div class="topbar-user-btn" onclick="toggleUserMenu()">
+          <div class="topbar-avatar">JD</div>
+          <span class="topbar-user-name">John Doe</span>
+          <span>⌄</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Page Content Injection Point -->
+    <div class="page-content" id="pageContent">
+      <!-- Pages are injected here by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- Notification Panel -->
+<div class="notif-panel" id="notifPanel" style="display:none">
+  <div class="notif-panel-header">
+    <h3>Notifications</h3>
+    <button class="notif-mark-all">Mark all read</button>
+  </div>
+  <div class="notif-list">
+    <div class="notif-item notif-unread"><div class="notif-icon" style="background:#EF444420;color:#EF4444">⚠</div><div class="notif-body"><p class="notif-title">Critical alert: CPU 95% on SRV-PROD-01</p><span class="notif-time">2 min ago</span></div></div>
+    <div class="notif-item notif-unread"><div class="notif-icon" style="background:#F59E0B20;color:#F59E0B">🔧</div><div class="notif-body"><p class="notif-title">12 pending patches on 4 devices</p><span class="notif-time">15 min ago</span></div></div>
+    <div class="notif-item"><div class="notif-icon" style="background:#10B98120;color:#10B981">✅</div><div class="notif-body"><p class="notif-title">Remote session ended — DESKTOP-MKT02</p><span class="notif-time">1 hr ago</span></div></div>
+    <div class="notif-item"><div class="notif-icon" style="background:#2563EB20;color:#2563EB">🎫</div><div class="notif-body"><p class="notif-title">New ticket #TK-2847 assigned to you</p><span class="notif-time">2 hr ago</span></div></div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Modal Overlay -->
+<div class="modal-overlay hidden" id="modalOverlay" onclick="closeModal()"></div>
+<div class="modal-container hidden" id="modalContainer"></div>
+
+<script src="scripts/app.js"></script>
+<script src="scripts/pages/dashboard.js"></script>
+<script src="scripts/pages/devices.js"></script>
+<script src="scripts/pages/remote.js"></script>
+<script src="scripts/pages/monitoring.js"></script>
+<script src="scripts/pages/security.js"></script>
+<script src="scripts/pages/helpdesk.js"></script>
+<script src="scripts/pages/patches.js"></script>
+<script src="scripts/pages/reports.js"></script>
+<script src="scripts/pages/filetransfer.js"></script>
+<script src="scripts/pages/software.js"></script>
+<script src="scripts/pages/agents.js"></script>
+<script src="scripts/pages/alerts.js"></script>
+<script src="scripts/pages/users.js"></script>
+<script src="scripts/pages/settings.js"></script>
 </body>
 </html>
